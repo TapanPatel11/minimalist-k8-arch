@@ -1,0 +1,57 @@
+
+### GEnerate Claim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-demo
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: standard
+---
+## create container and mount points
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-boot-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-boot-app
+  template:
+    metadata:
+      labels:
+        app: spring-boot-app
+    spec:
+      containers:
+        - name: spring-boot-app
+          image: us-west2-docker.pkg.dev/cscicloudcomputing/docker-registry/spring-boot:latest
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: my-volume
+              mountPath: /Tapan_PV_dir
+      volumes:
+        - name: my-volume
+          persistentVolumeClaim:
+            claimName: pvc-demo
+---
+### load balancer to expose external IP 
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-boot-app-service
+  namespace: default
+spec:
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8080
+  selector:
+    app: spring-boot-app
+  type: LoadBalancer
+  loadBalancerIP: ""

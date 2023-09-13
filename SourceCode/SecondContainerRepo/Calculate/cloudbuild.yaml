@@ -1,0 +1,33 @@
+steps:
+  # Maven install
+  - name: 'gcr.io/cloud-builders/mvn'
+    args: ['clean','install']
+    dir: 'Calculate/'
+
+  # Docker build
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [ 'build', '-t', 'us-west2-docker.pkg.dev/${PROJECT_ID}/docker-registry/container2:latest', '.' ]
+    dir: 'Calculate/'
+
+  # Docker Push
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'push',
+      'us-west2-docker.pkg.dev/${PROJECT_ID}/docker-registry/container2:latest'
+    ]
+  # Deploy to GKE
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args: [
+      'apply',
+      '-f',
+      'container2deployment.yaml'
+    ]
+    env:
+      - 'CLOUDSDK_COMPUTE_ZONE=us-west2'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=my-cluster'
+      - 'CLOUDSDK_CORE_PROJECT=${PROJECT_ID}'
+    dir: 'Calculate/'
+
+images:
+  - 'us-west2-docker.pkg.dev/${PROJECT_ID}/docker-registry/container2:latest'
+#test

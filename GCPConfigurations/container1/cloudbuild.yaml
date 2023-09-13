@@ -1,0 +1,32 @@
+steps:
+  # Maven install
+  - name: 'gcr.io/cloud-builders/mvn'
+    args: ['clean','install']
+    dir: 'Kubernetes/'
+
+  # Docker build
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [ 'build', '-t', 'us-west2-docker.pkg.dev/${PROJECT_ID}/docker-registry/spring-boot:latest', '.' ]
+    dir: 'Kubernetes/'
+
+  # Docker Push
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'push',
+      'us-west2-docker.pkg.dev/${PROJECT_ID}/docker-registry/spring-boot:latest'
+    ]
+  # Deploy to GKE
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args: [
+      'apply',
+      '-f',
+      'container1Deployment.yaml'
+    ]
+    env:
+      - 'CLOUDSDK_COMPUTE_ZONE=us-west2'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=my-cluster'
+      - 'CLOUDSDK_CORE_PROJECT=${PROJECT_ID}'
+    dir: 'Kubernetes/'
+images:
+  - 'us-west2-docker.pkg.dev/${PROJECT_ID}/docker-registry/spring-boot:latest'
+#test
