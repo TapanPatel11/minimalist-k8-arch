@@ -1,0 +1,51 @@
+# Compiled class files
+target/
+bin/
+
+# Maven build files
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# IntelliJ IDEA files
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Eclipse files
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.swp
+*.swo
+
+# Spring Boot specific
+.env
+*.jar
+*.war
+*.ear
+
+# Dependency directories
+mvnw
+mvnw.cmd
+
+# Test reports
+surefire-reports/
+failsafe-reports/
