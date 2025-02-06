@@ -39,7 +39,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@62f4f872db3836360b72999f4b87f1ff13310f3a
 
       - name: Build, tag, and push calulator image to Amazon ECR
-        id: build-image
+        id: build-gatekeeper-image
         env:
             ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
             IMAGE_TAG: latest
@@ -53,16 +53,16 @@ jobs:
             echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
 
-            - name: Build, tag, and push gatekeepr image to Amazon ECR
-            id: build-image
-            env:
-                ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-                IMAGE_TAG: latest
-                ECR_REPOSITORY:  "${{ env.BASE_ECR_REPO }}/${{ env.FIRST_CONTAINER_NAME }}"
-            run: |
-                # Build a docker container and
-                # push it to ECR so that it can
-                # be deployed to ECS.
-                docker build -f ./SourceCode/secondContainer/calculator/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./SourceCode/secondContainer/calculator/
-                docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-                echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+      - name: Build, tag, and push calculator image to Amazon ECR
+        id: build-calculator-image
+        env:
+            ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+            IMAGE_TAG: latest
+            ECR_REPOSITORY:  "${{ env.BASE_ECR_REPO }}/${{ env.FIRST_CONTAINER_NAME }}"
+        run: |
+            # Build a docker container and
+            # push it to ECR so that it can
+            # be deployed to ECS.
+            docker build -f ./SourceCode/secondContainer/calculator/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./SourceCode/secondContainer/calculator/
+            docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+            echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
