@@ -1,0 +1,91 @@
+# Storage Class
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: efs-sc
+  namespace: default
+provisioner: efs.csi.aws.com
+parameters:
+  provisioningMode: efs-ap
+  fileSystemId: fs-008108b43be534b2d
+  directoryPerms: "700"
+
+---
+# Persistent Volume
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: efs-pv
+  namespace: default
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: efs-sc
+  csi:
+    driver: efs.csi.aws.com
+    volumeHandle: fs-008108b43be534b2d
+
+---
+# Persistent Volume Claim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shared-efs-claim
+  namespace: default
+spec:
+  storageClassName: efs-sc
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+# Deployment for Gatekeeper App
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gatekeeper-app
+  namespace: default
+spec:
+  replicas: 2  # Increased for redundancy
+  selector:
+    matchLabels:
+      app: gatekeeper-app
+  template:
+    metadata:
+      labels:
+        app: gatekeeper-app
+    spec:
+      containers:
+        - name: gatekeeper-app
+          image: 881490087450.dkr.ecr.us-east-1.amazonaws.com/k8-demo/gatekeeper:latest
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: efs
+              mountPath: /files
+      volumes:
+        - name: efs
+          persistentVolumeClaim:
+            claimName: shared-efs-claim
+
+---
+# LoadBalancer Service for Gatekeeper App
+apiVersion: v1
+kind: Service
+metadata:
+  name: gatekeeper-app-service
+  namespace: default
+spec:
+  type: LoadBalancer
+  selector:
+    app: gatekeeper-app
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8080

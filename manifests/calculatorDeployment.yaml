@@ -1,0 +1,44 @@
+# Deployment for Calculator App
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: calculator-app
+  namespace: default
+spec:
+  replicas: 2  # Increased for redundancy
+  selector:
+    matchLabels:
+      app: calculator-app
+  template:
+    metadata:
+      labels:
+        app: calculator-app
+    spec:
+      containers:
+        - name: calculator-app
+          image: 881490087450.dkr.ecr.us-east-1.amazonaws.com/k8-demo/calculator:latest
+          ports:
+            - containerPort: 8081
+          volumeMounts:
+            - name: efs
+              mountPath: /files
+      volumes:
+        - name: efs
+          persistentVolumeClaim:
+            claimName: shared-efs-claim
+
+---
+# LoadBalancer Service for Calculator App
+apiVersion: v1
+kind: Service
+metadata:
+  name: calculator-app-service
+  namespace: default
+spec:
+  type: LoadBalancer
+  selector:
+    app: calculator-app
+  ports:
+    - protocol: TCP
+      port: 8001
+      targetPort: 8081
