@@ -78,4 +78,4 @@ jobs:
           ECR_REPOSITORY:  "${{ env.BASE_ECR_REPO }}/${{ env.FIRST_CONTAINER_NAME }}"
         run: |
           sed -i.bak "s|DOCKER_IMAGE|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g" manifests/gatekeeperDeployment.yaml && \
-          kubectl apply -f manifests/hello-app-deployment.yaml      
+          kubectl apply -f manifests/gatekeeperDeployment.yaml      
